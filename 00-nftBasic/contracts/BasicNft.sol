@@ -8,17 +8,13 @@ contract BasicNft is ERC721 {
     "ipfs://bafybeig37ioir76s7mg5oobetncojcm3c3hxasyd4rvid4jqhy4gkaheg4/?filename=0-PUG.json";
   uint256 private s_tokenCounter;
 
-  event DogMinted(uint256 indexed tokenId);
-
   constructor() ERC721("Dogie", "DOG") {
-    _safeMint(msg.sender, s_tokenCounter);
-    s_tokenCounter++;
+    s_tokenCounter = 0;
   }
 
   function mintNft() public {
+    s_tokenCounter = s_tokenCounter + 1;
     _safeMint(msg.sender, s_tokenCounter);
-    emit DogMinted(s_tokenCounter);
-    s_tokenCounter++;
   }
 
   function tokenURI(uint256 tokenId) public view override returns (string memory) {
