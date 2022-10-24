@@ -10,7 +10,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     : VERIFICATION_BLOCK_CONFIRMATIONS
 
   const arguments = []
-  const basicNft = await deploy("BasicNft", {
+  const noylings = await deploy("Noylings", {
     from: deployer,
     args: arguments,
     log: true,
@@ -18,4 +18,4 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   })
 }
 
-module.exports.tags = ["all", "basicNft"]
+module.exports.tags = ["all", "noylings"]
