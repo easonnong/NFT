@@ -26,7 +26,7 @@ contract Nyolings is ERC721A, Ownable, ReentrancyGuard {
   uint256 public maxPerWalletAllowlist = 3;
 
   string public uriPrefix = "";
-  string public hiddenMetadataUri = "";
+  string public hiddenMetadataUri = "ipfs://";
 
   bytes32 public whitelistMerkleRoot;
 
