@@ -10,12 +10,20 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     : VERIFICATION_BLOCK_CONFIRMATIONS
 
   const arguments = []
-  const noylings = await deploy("Noylings", {
+  const nyolings = await deploy("Nyolings", {
     from: deployer,
     args: arguments,
     log: true,
     waitBlockConfirmations: waitBlockConfirmations,
   })
+
+  // Verify the deployment
+  /*
+  if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
+    log("Verifying...")
+    await verify(nyolings.address, arguments)
+  }
+  */
 }
 
-module.exports.tags = ["all", "noylings"]
+module.exports.tags = ["all", "nyolings"]
