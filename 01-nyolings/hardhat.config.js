@@ -24,6 +24,12 @@ const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "Your etherscan API k
 const POLYGONSCAN_API_KEY = process.env.POLYGONSCAN_API_KEY || "Your polygonscan API key"
 const REPORT_GAS = process.env.REPORT_GAS || false
 
+// VPN
+// yarn add undici
+const { setGlobalDispatcher, ProxyAgent } = require("undici")
+const proxyAgent = new ProxyAgent("http://127.0.0.1:19180")
+setGlobalDispatcher(proxyAgent)
+
 module.exports = {
   defaultNetwork: "hardhat",
   networks: {
