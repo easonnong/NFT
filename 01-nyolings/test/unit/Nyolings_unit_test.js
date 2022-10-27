@@ -7,23 +7,34 @@ const { developmentChains } = require("../../helper-hardhat-config")
   ? describe.skip
   : describe("Nyolings NFT Unit Tests", function () {
       async function deployContractLockFixture() {
-        let noylings, noylingsContract
+        let nyolings, noylingsContract
         const accounts = await ethers.getSigners()
         const deployer = accounts[0]
         const user = accounts[1]
         await deployments.fixture(["nyolings"])
         noylingsContract = await ethers.getContract("Nyolings")
-        noylings = noylingsContract.connect(deployer)
-        return { noylings, deployer, user }
+        nyolings = noylingsContract.connect(deployer)
+        return { nyolings, deployer, user }
       }
 
       describe("construtor", function () {
         it("initalizes the NFT correctly", async () => {
-          let { noylings } = await loadFixture(deployContractLockFixture)
-          const name = await noylings.name()
-          const symbol = await noylings.symbol()
-          assert.equal(name, "Nyolings")
-          assert.equal(symbol, "NYOLINGS")
+          let { nyolings } = await loadFixture(deployContractLockFixture)
+          expect((await nyolings.name()).toString()).to.equal("Nyolings")
+          expect((await nyolings.symbol()).toString()).to.equal("NYOLINGS")
+          expect((await nyolings.state()).toString()).to.equal("0")
+          expect((await nyolings.maxSupply()).toString()).to.equal("7777")
+          expect((await nyolings.publicSupply()).toString()).to.equal("5555")
+          expect(ethers.utils.formatEther(await nyolings.publicCost())).to.equal("0.03")
+          expect((await nyolings.maxMintAmountPerTx()).toString()).to.equal("3")
+          expect((await nyolings.maxPerWalletPublic()).toString()).to.equal("3")
+          expect((await nyolings.maxPerWalletAllowlist()).toString()).to.equal("3")
+          expect((await nyolings.uriPrefix()).toString()).to.equal("")
+          expect((await nyolings.hiddenMetadataUri()).toString()).to.equal("ipfs://")
         })
+      })
+
+      describe("publicMint", function () {
+        it("reverts if public mint is disabled")
       })
     })

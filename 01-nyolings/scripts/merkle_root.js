@@ -25,6 +25,6 @@ const findHexProof = async () => {
 }
 
 //findMerkleRoot()
-findHexProof()
+//findHexProof()
 
 module.exports = { findMerkleRoot, findHexProof }
