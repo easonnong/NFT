@@ -34,7 +34,7 @@ const { developmentChains } = require("../../helper-hardhat-config")
         })
       })
 
-      describe("publicMint", function () {
+      describe.only("publicMint", function () {
         it("reverts if public mint is disabled", async () => {
           let { nyolings } = await loadFixture(deployContractLockFixture)
           await expect(nyolings.publicMint(1)).to.be.revertedWith("Public mint is disabled")
@@ -51,6 +51,42 @@ const { developmentChains } = require("../../helper-hardhat-config")
             await nyolings.mintForAddress(deployer.address, 7775)
             await expect(nyolings.publicMint(3)).to.be.revertedWith("Max supply exceeded")
           })
+        })
+        it("reverts if public mint minted more than limit", async () => {
+          let { nyolings } = await loadFixture(deployContractLockFixture)
+          await nyolings.setState(1)
+          const fee = ethers.utils.parseEther((0.03 * 3).toString())
+          await nyolings.publicMint(3, { value: fee.toString() })
+          await expect(nyolings.publicMint(1)).to.be.revertedWith("Cannot mint that many")
+        })
+        it("reverts if public donnot have enough eth", async () => {
+          let { nyolings } = await loadFixture(deployContractLockFixture)
+          await nyolings.setState(1)
+          const fee = ethers.utils.parseEther((0.01).toString())
+          await expect(nyolings.publicMint(1)).to.be.revertedWith("Need more eth")
+        })
+        it("updates the price of the item and emits ItemListed", async () => {
+          let { nyolings, deployer } = await loadFixture(deployContractLockFixture)
+          await nyolings.setState(1)
+          const fee = ethers.utils.parseEther("0.03")
+          await nyolings.publicMint(1, { value: fee.toString() })
+          console.log(
+            `paid:${ethers.utils.formatEther(await nyolings.publicPaid(deployer.address))}`
+          )
+          expect(ethers.utils.formatEther(await nyolings.publicPaid(deployer.address))).to.equal(
+            "0.03"
+          )
+          console.log(`minted:${await nyolings.publicMinted(deployer.address)}`)
+          expect(await nyolings.publicMinted(deployer.address)).to.equal(1)
+          expect(await nyolings.balanceOf(deployer.address)).to.equal(1)
+          console.log("3")
+        })
+      })
+
+      describe("allowlistMint", function () {
+        it("reverts if allowlist mint is disabled", async () => {
+          let { nyolings } = await loadFixture(deployContractLockFixture)
+          await expect(nyolings.allowlistMint(1)).to.be.revertedWith("Allow list mint is disabled")
         })
       })
     })
