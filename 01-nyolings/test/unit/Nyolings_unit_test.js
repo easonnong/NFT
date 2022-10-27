@@ -35,6 +35,22 @@ const { developmentChains } = require("../../helper-hardhat-config")
       })
 
       describe("publicMint", function () {
-        it("reverts if public mint is disabled")
+        it("reverts if public mint is disabled", async () => {
+          let { nyolings } = await loadFixture(deployContractLockFixture)
+          await expect(nyolings.publicMint(1)).to.be.revertedWith("Public mint is disabled")
+        })
+        describe("mintCompliance", function () {
+          it("reverts if mint more than maxMintAmountPerTx", async () => {
+            let { nyolings } = await loadFixture(deployContractLockFixture)
+            await nyolings.setState(1)
+            await expect(nyolings.publicMint(4)).to.be.revertedWith("Invalid mint amount")
+          })
+          it("reverts if mint more than maxSupply", async () => {
+            let { nyolings, deployer } = await loadFixture(deployContractLockFixture)
+            await nyolings.setState(1)
+            await nyolings.mintForAddress(deployer.address, 7775)
+            await expect(nyolings.publicMint(3)).to.be.revertedWith("Max supply exceeded")
+          })
+        })
       })
     })
