@@ -73,7 +73,7 @@ const {
           const fee = ethers.utils.parseEther((0.01).toString())
           await expect(nyolings.publicMint(1)).to.be.revertedWith("Need more eth")
         })
-        it("updates the price of the item and emits ItemListed", async () => {
+        it("updates the balance of public minter", async () => {
           let { nyolings, deployer } = await loadFixture(deployContractLockFixture)
           await nyolings.setState(1)
           const fee = ethers.utils.parseEther("0.03")
@@ -109,6 +109,12 @@ const {
           )
         })
         it("reverts if allowlist mint cannot verify", async () => {
+          let { nyolings, deployer } = await loadFixture(allowlistMintLockFixture)
+          await nyolings.setState(2)
+          const newProof = []
+          await expect(nyolings.allowlistMint(1, newProof)).to.be.revertedWithoutReason()
+        })
+        it("updates the balance of allowlist minter", async () => {
           let { nyolings, proof, deployer } = await loadFixture(allowlistMintLockFixture)
           await nyolings.setState(2)
           await nyolings.allowlistMint(1, proof)
