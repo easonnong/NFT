@@ -2,6 +2,7 @@ const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers")
 const { assert, expect } = require("chai")
 const { network, deployments, ethers } = require("hardhat")
 const { developmentChains } = require("../../helper-hardhat-config")
+const { findMerkleRoot, findHexProof, findHexProofByAddr } = require("../../scripts/merkle_root")
 
 !developmentChains.includes(network.name)
   ? describe.skip
@@ -84,9 +85,17 @@ const { developmentChains } = require("../../helper-hardhat-config")
       })
 
       describe("allowlistMint", function () {
-        it("reverts if allowlist mint is disabled", async () => {
+        it.only("reverts if allowlist mint is disabled", async () => {
+          let { nyolings } = await loadFixture(deployContractLockFixture)
+          findMerkleRoot()
+          findHexProofByAddr("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+          //await expect(nyolings.allowlistMint(1)).to.be.revertedWith("Allow list mint is disabled")
+        })
+        it("reverts if allowlist mint cannot verify", async () => {
           let { nyolings } = await loadFixture(deployContractLockFixture)
           await expect(nyolings.allowlistMint(1)).to.be.revertedWith("Allow list mint is disabled")
+          findMerkleRoot()
+          findHexProofByAddr("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
         })
       })
     })
