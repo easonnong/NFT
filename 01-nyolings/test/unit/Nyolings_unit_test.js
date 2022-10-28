@@ -87,7 +87,7 @@ const {
       })
 
       describe("allowlistMint", function () {
-        it.only("reverts if allowlist mint is disabled", async () => {
+        async function allowlistMintLockFixture() {
           let { nyolings, deployer, user1, user2, user3 } = await loadFixture(
             deployContractLockFixture
           )
@@ -98,15 +98,22 @@ const {
             user3.address.toString(),
           ]
           const root = findMerkleRootByAddr(addrs)
-          const proof = await findHexProofByAddr(addrs, user1.address.toString())
+          let proof = await findHexProofByAddr(addrs, deployer.address.toString())
           await nyolings.setWhitelistMerkleRoot(root)
-          await expect(nyolings.allowlistMint(1)).to.be.revertedWith("Allow list mint is disabled")
+          return { nyolings, deployer, user1, user2, user3, addrs, root, proof }
+        }
+        it("reverts if allowlist mint is disabled", async () => {
+          let { nyolings, proof } = await loadFixture(allowlistMintLockFixture)
+          await expect(nyolings.allowlistMint(1, proof)).to.be.revertedWith(
+            "Allow list mint is disabled"
+          )
         })
         it("reverts if allowlist mint cannot verify", async () => {
-          let { nyolings } = await loadFixture(deployContractLockFixture)
-          await expect(nyolings.allowlistMint(1)).to.be.revertedWith("Allow list mint is disabled")
-          findMerkleRoot()
-          findHexProofByAddr("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+          let { nyolings, proof, deployer } = await loadFixture(allowlistMintLockFixture)
+          await nyolings.setState(2)
+          await nyolings.allowlistMint(1, proof)
+          expect(await nyolings.allowlistMinted(deployer.address)).to.equal(1)
+          expect(await nyolings.balanceOf(deployer.address)).to.equal(1)
         })
       })
     })
