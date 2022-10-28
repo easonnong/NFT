@@ -28,22 +28,22 @@ const findHexProof = async () => {
   console.log(hexProof, "hexProof")
 }
 
-// find merkle root by addr
-const findMerkleRootByAddr = (whitelistedAddress) => {
-  let leafNode = whitelistedAddress.map((addr) => keccak256(addr))
+// find merkle root by addrs
+const findMerkleRootByAddr = (addrs) => {
+  let leafNode = addrs.map((addr) => keccak256(addr))
   const merkleTree = new MerkleTree(leafNode, keccak256, { sortPairs: true })
   const rootHash = merkleTree.getHexRoot()
-  console.log(rootHash, "roothash")
+  return rootHash
 }
 
 // Find hex proof by addr
-const findHexProofByAddr = async (addr) => {
-  let indexOfArray = /*await*/ whitelistedAddress.indexOf(addr)
-  let leafNode = whitelistedAddress.map((addr) => keccak256(addr))
-  const merkleTree = /*await*/ new MerkleTree(leafNode, keccak256, { sortPairs: true })
+const findHexProofByAddr = async (addrs, addrToFind) => {
+  let indexOfArray = addrs.indexOf(addrToFind)
+  let leafNode = addrs.map((addr) => keccak256(addr))
+  const merkleTree = new MerkleTree(leafNode, keccak256, { sortPairs: true })
   const clamingAddress = leafNode[indexOfArray]
   const hexProof = merkleTree.getHexProof(clamingAddress)
-  console.log(hexProof, "hexProof")
+  return hexProof
 }
 
 //findMerkleRoot()

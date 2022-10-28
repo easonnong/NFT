@@ -2,7 +2,12 @@ const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers")
 const { assert, expect } = require("chai")
 const { network, deployments, ethers } = require("hardhat")
 const { developmentChains } = require("../../helper-hardhat-config")
-const { findMerkleRoot, findHexProof, findHexProofByAddr } = require("../../scripts/merkle_root")
+const {
+  findMerkleRoot,
+  findHexProof,
+  findHexProofByAddr,
+  findMerkleRootByAddr,
+} = require("../../scripts/merkle_root")
 
 !developmentChains.includes(network.name)
   ? describe.skip
@@ -11,11 +16,13 @@ const { findMerkleRoot, findHexProof, findHexProofByAddr } = require("../../scri
         let nyolings, noylingsContract
         const accounts = await ethers.getSigners()
         const deployer = accounts[0]
-        const user = accounts[1]
+        const user1 = accounts[1]
+        const user2 = accounts[2]
+        const user3 = accounts[3]
         await deployments.fixture(["nyolings"])
         noylingsContract = await ethers.getContract("Nyolings")
         nyolings = noylingsContract.connect(deployer)
-        return { nyolings, deployer, user }
+        return { nyolings, deployer, user1, user2, user3 }
       }
 
       describe("construtor", function () {
@@ -35,7 +42,7 @@ const { findMerkleRoot, findHexProof, findHexProofByAddr } = require("../../scri
         })
       })
 
-      describe.only("publicMint", function () {
+      describe("publicMint", function () {
         it("reverts if public mint is disabled", async () => {
           let { nyolings } = await loadFixture(deployContractLockFixture)
           await expect(nyolings.publicMint(1)).to.be.revertedWith("Public mint is disabled")
@@ -71,25 +78,29 @@ const { findMerkleRoot, findHexProof, findHexProofByAddr } = require("../../scri
           await nyolings.setState(1)
           const fee = ethers.utils.parseEther("0.03")
           await nyolings.publicMint(1, { value: fee.toString() })
-          console.log(
-            `paid:${ethers.utils.formatEther(await nyolings.publicPaid(deployer.address))}`
-          )
           expect(ethers.utils.formatEther(await nyolings.publicPaid(deployer.address))).to.equal(
             "0.03"
           )
-          console.log(`minted:${await nyolings.publicMinted(deployer.address)}`)
           expect(await nyolings.publicMinted(deployer.address)).to.equal(1)
           expect(await nyolings.balanceOf(deployer.address)).to.equal(1)
-          console.log("3")
         })
       })
 
       describe("allowlistMint", function () {
         it.only("reverts if allowlist mint is disabled", async () => {
-          let { nyolings } = await loadFixture(deployContractLockFixture)
-          findMerkleRoot()
-          findHexProofByAddr("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
-          //await expect(nyolings.allowlistMint(1)).to.be.revertedWith("Allow list mint is disabled")
+          let { nyolings, deployer, user1, user2, user3 } = await loadFixture(
+            deployContractLockFixture
+          )
+          const addrs = [
+            deployer.address.toString(),
+            user1.address.toString(),
+            user2.address.toString(),
+            user3.address.toString(),
+          ]
+          const root = findMerkleRootByAddr(addrs)
+          const proof = await findHexProofByAddr(addrs, user1.address.toString())
+          await nyolings.setWhitelistMerkleRoot(root)
+          await expect(nyolings.allowlistMint(1)).to.be.revertedWith("Allow list mint is disabled")
         })
         it("reverts if allowlist mint cannot verify", async () => {
           let { nyolings } = await loadFixture(deployContractLockFixture)
