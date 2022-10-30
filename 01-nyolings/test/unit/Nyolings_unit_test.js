@@ -122,4 +122,41 @@ const {
           expect(await nyolings.balanceOf(deployer.address)).to.equal(1)
         })
       })
+
+      describe("mintForAddress", function () {
+        it("mint for other addrs successfully", async () => {
+          let { nyolings, user1, user2 } = await loadFixture(deployContractLockFixture)
+          await nyolings.mintForAddress(user1.address, 1)
+          await nyolings.mintForAddress(user2.address, 2)
+          expect(await nyolings.balanceOf(user1.address)).to.equal(1)
+          expect(await nyolings.balanceOf(user2.address)).to.equal(2)
+        })
+      })
+
+      describe.only("refundIfOver", function () {
+        it("reverts if REFUND is disabled", async () => {
+          let { nyolings } = await loadFixture(deployContractLockFixture)
+          await expect(nyolings.refundIfOver()).to.be.revertedWith("Refund is disabled")
+        })
+        it("refund successfully", async () => {
+          let { nyolings, deployer } = await loadFixture(deployContractLockFixture)
+          await nyolings.setState(1)
+          const balanceBefore = await deployer.getBalance()
+          const fee = ethers.utils.parseEther("1")
+          let txResponse = await nyolings.publicMint(1, { value: fee.toString() })
+          let transactionReceipt = await txResponse.wait(1)
+          let { gasUsed: gasUsedMint, effectiveGasPrice: gasPriceMint } = transactionReceipt
+          const gasCostMint = gasUsedMint.mul(gasPriceMint)
+          await nyolings.setState(3)
+          txResponse = await nyolings.refundIfOver()
+          transactionReceipt = await txResponse.wait(1)
+          let { gasUsed: gasUsedRefund, effectiveGasPrice: gasPriceRefund } = transactionReceipt
+          const gasCostRefund = gasUsedRefund.mul(gasPriceRefund)
+          const balanceAfter = await deployer.getBalance()
+          assert(
+            balanceAfter.add(gasCostRefund).add(gasCostMint).toString() ==
+              balanceBefore.sub(0.03).toString()
+          )
+        })
+      })
     })

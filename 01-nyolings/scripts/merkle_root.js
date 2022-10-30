@@ -16,7 +16,7 @@ const findMerkleRoot = () => {
 }
 
 // Address you want to find merkle hex proof
-let addr = "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2"
+let addr = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 
 // Find hex proof
 const findHexProof = async () => {
@@ -47,6 +47,6 @@ const findHexProofByAddr = async (addrs, addrToFind) => {
 }
 
 //findMerkleRoot()
-//findHexProof()
+findHexProof()
 
 module.exports = { findMerkleRoot, findHexProof, findHexProofByAddr, findMerkleRootByAddr }

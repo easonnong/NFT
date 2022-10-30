@@ -68,7 +68,7 @@ contract Nyolings is ERC721A, Ownable, ReentrancyGuard {
     require(totalSupply() + amount <= publicSupply, "Cannot mint that many");
     require(publicMinted[msg.sender] + amount <= maxPerWalletPublic, "Cannot mint that many");
     require(msg.value >= publicCost * amount, "Need more eth");
-    publicPaid[msg.sender] += publicCost * amount;
+    publicPaid[msg.sender] += msg.value;
     publicMinted[msg.sender] += amount;
     _safeMint(msg.sender, amount);
   }
