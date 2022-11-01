@@ -76,7 +76,7 @@ contract Nyolings is ERC721A, Ownable, ReentrancyGuard {
   function allowlistMint(uint256 amount, bytes32[] calldata proof) external mintCompliance(amount) {
     require(state == ContractMintState.ALLOWLIST, "Allow list mint is disabled");
     require(allowlistMinted[msg.sender] + amount <= maxPerWalletAllowlist, "Cannot mint that many");
-    require(_verify(_leaf(msg.sender), proof));
+    require(_verify(_leaf(msg.sender), proof), "verify error");
     allowlistMinted[msg.sender] += amount;
     _safeMint(msg.sender, amount);
   }

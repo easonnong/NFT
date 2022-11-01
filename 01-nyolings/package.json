@@ -4,13 +4,13 @@
   "description": "",
   "scripts": {
     "compile": "hardhat compile",
-    "test": "hardhat test test/unit/Nyolings_unit_test.js --network hardhat",
+    "test": "hardhat test test/unit/*_test.js --network hardhat",
     "test-staging": "hardhat test test/staging/*_test.js --network goerli",
-    "lint": "solhint 'contracts/*.sol'",
-    "lint:fix": "solhint 'contracts/**/*.sol' --fix",
+    "lint": "solhint contracts/*.sol",
+    "lint:fix": "solhint contracts/**/*.sol --fix",
     "format": "prettier --write .",
     "coverage": "hardhat coverage --solcoverjs ./.solcover.js",
-    "fuzzing": "docker run -it --rm -v $PWD:/src trailofbits/eth-security-toolbox"
+    "fuzzing": "docker run -it --rm -v %cd%:/src trailofbits/eth-security-toolbox"
   },
   "license": "MIT",
   "devDependencies": {
