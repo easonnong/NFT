@@ -41,8 +41,10 @@
     "@chainlink/test-helpers": "^0.0.7-alpha",
     "@chainlink/token": "^1.1.0",
     "@openzeppelin/contracts-upgradeable": "^4.8.0",
+    "@openzeppelin/hardhat-upgrades": "^1.22.0",
     "babel-eslint": "^10.1.0",
-    "dotenv": "^10.0.0"
+    "dotenv": "^10.0.0",
+    "undici": "^5.14.0"
   },
   "mocha": {
     "timeout": 10000000

@@ -5,6 +5,7 @@ require("hardhat-contract-sizer")
 require("hardhat-deploy")
 require("./tasks")
 require("dotenv").config()
+require("@openzeppelin/hardhat-upgrades")
 
 const MAINNET_RPC_URL =
   process.env.MAINNET_RPC_URL ||
@@ -22,6 +23,12 @@ const FORKING_BLOCK_NUMBER = process.env.FORKING_BLOCK_NUMBER
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "Your etherscan API key"
 const POLYGONSCAN_API_KEY = process.env.POLYGONSCAN_API_KEY || "Your polygonscan API key"
 const REPORT_GAS = process.env.REPORT_GAS || false
+
+// VPN
+// yarn add undici
+const { setGlobalDispatcher, ProxyAgent } = require("undici")
+const proxyAgent = new ProxyAgent("http://127.0.0.1:19180")
+setGlobalDispatcher(proxyAgent)
 
 module.exports = {
   defaultNetwork: "hardhat",

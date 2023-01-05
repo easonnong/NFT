@@ -1677,6 +1677,29 @@
   resolved "https://registry.npmmirror.com/@openzeppelin/contracts/-/contracts-3.4.2.tgz#d81f786fda2871d1eb8a8c5a73e455753ba53527"
   integrity sha512-z0zMCjyhhp4y7XKAcDAi3Vgms4T2PstwBdahiO0+9NaGICQKjynK3wduSRplTgk4LXmoO1yfDGO5RbjKYxtuxA==
 
+"@openzeppelin/hardhat-upgrades@^1.22.0":
+  version "1.22.0"
+  resolved "https://registry.npmmirror.com/@openzeppelin/hardhat-upgrades/-/hardhat-upgrades-1.22.0.tgz#2a432c72a428a9f277201646bc1a248021538f06"
+  integrity sha512-1qyZnDaxl0C8tne7ykNRa/fxw3FrNCY2M3fGuCiQW5DDkJoXhLgm3JVsXwl6X7q9mQSrik4vgBbI3ErmxmZTYg==
+  dependencies:
+    "@openzeppelin/upgrades-core" "^1.20.0"
+    chalk "^4.1.0"
+    debug "^4.1.1"
+    proper-lockfile "^4.1.1"
+
+"@openzeppelin/upgrades-core@^1.20.0":
+  version "1.20.6"
+  resolved "https://registry.npmmirror.com/@openzeppelin/upgrades-core/-/upgrades-core-1.20.6.tgz#74f43d600151b8fda6e2d375f46ae0da55922620"
+  integrity sha512-KWdtlahm+iunlAlzLsdpBueanwEx0LLPfAkDL1p0C4SPjMiUqHHFlyGtmmWwdiqDpJ//605vfwkd5RqfnFrHSg==
+  dependencies:
+    cbor "^8.0.0"
+    chalk "^4.1.0"
+    compare-versions "^5.0.0"
+    debug "^4.1.1"
+    ethereumjs-util "^7.0.3"
+    proper-lockfile "^4.1.1"
+    solidity-ast "^0.4.15"
+
 "@scure/base@~1.1.0":
   version "1.1.1"
   resolved "https://registry.npmmirror.com/@scure/base/-/base-1.1.1.tgz#ebb651ee52ff84f420097055f4bf46cfba403938"
@@ -3798,7 +3821,7 @@ cbor@^5.0.2, cbor@^5.2.0:
     bignumber.js "^9.0.1"
     nofilter "^1.0.4"
 
-cbor@^8.1.0:
+cbor@^8.0.0, cbor@^8.1.0:
   version "8.1.0"
   resolved "https://registry.npmmirror.com/cbor/-/cbor-8.1.0.tgz#cfc56437e770b73417a2ecbfc9caf6b771af60d5"
   integrity sha512-DwGjNW9omn6EwP70aXsn7FQJx5kO12tX0bZkaTjzdVFM6/7nhA4t0EENocKGx6D2Bch9PE2KzCUf5SceBdeijg==
@@ -4183,6 +4206,11 @@ commander@^8.1.0:
   version "8.3.0"
   resolved "https://registry.npmmirror.com/commander/-/commander-8.3.0.tgz#4837ea1b2da67b9c616a67afbb0fafee567bca66"
   integrity sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==
+
+compare-versions@^5.0.0:
+  version "5.0.3"
+  resolved "https://registry.npmmirror.com/compare-versions/-/compare-versions-5.0.3.tgz#a9b34fea217472650ef4a2651d905f42c28ebfd7"
+  integrity sha512-4UZlZP8Z99MGEY+Ovg/uJxJuvoXuN4M6B3hKaiackiHrgzQFEe3diJi1mf1PNHbFujM7FvLrK2bpgIaImbtZ1A==
 
 component-emitter@^1.2.1:
   version "1.3.0"
@@ -5547,7 +5575,7 @@ ethereumjs-util@^5.0.0, ethereumjs-util@^5.0.1, ethereumjs-util@^5.1.1, ethereum
     rlp "^2.0.0"
     safe-buffer "^5.1.1"
 
-ethereumjs-util@^7.0.10, ethereumjs-util@^7.0.2, ethereumjs-util@^7.1.0, ethereumjs-util@^7.1.1, ethereumjs-util@^7.1.2, ethereumjs-util@^7.1.4, ethereumjs-util@^7.1.5:
+ethereumjs-util@^7.0.10, ethereumjs-util@^7.0.2, ethereumjs-util@^7.0.3, ethereumjs-util@^7.1.0, ethereumjs-util@^7.1.1, ethereumjs-util@^7.1.2, ethereumjs-util@^7.1.4, ethereumjs-util@^7.1.5:
   version "7.1.5"
   resolved "https://registry.npmmirror.com/ethereumjs-util/-/ethereumjs-util-7.1.5.tgz#9ecf04861e4fbbeed7465ece5f23317ad1129181"
   integrity sha512-SDl5kKrQAudFBUe5OJM9Ac6WmMyYmXX/6sTmLZ3ffG2eY6ZIGBes3pEDxNN6V72WyOw4CPD5RomKdsa8DAAwLg==
@@ -6564,7 +6592,7 @@ got@^11.8.5:
     p-cancelable "^2.0.0"
     responselike "^2.0.0"
 
-graceful-fs@^4.1.11, graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.1.9, graceful-fs@^4.2.0:
+graceful-fs@^4.1.11, graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.1.9, graceful-fs@^4.2.0, graceful-fs@^4.2.4:
   version "4.2.10"
   resolved "https://registry.npmmirror.com/graceful-fs/-/graceful-fs-4.2.10.tgz#147d3a006da4ca3ce14728c7aefc287c367d7a6c"
   integrity sha512-9ByhssR2fPVsNZj478qUUbKfmL0+t5BDVyjShtyZZLiK7ZDAArFFfopyOTj0M05wE2tJPisA4iTnnXl2YoPvOA==
@@ -9441,6 +9469,15 @@ promise@^8.0.0:
   dependencies:
     asap "~2.0.6"
 
+proper-lockfile@^4.1.1:
+  version "4.1.2"
+  resolved "https://registry.npmmirror.com/proper-lockfile/-/proper-lockfile-4.1.2.tgz#c8b9de2af6b2f1601067f98e01ac66baa223141f"
+  integrity sha512-TjNPblN4BwAWMXU8s9AEz4JmQxnD1NNL7bNOY/AKUzyamc379FWASUhc/K1pL2noVb+XmZKLL68cjzLsiOAMaA==
+  dependencies:
+    graceful-fs "^4.2.4"
+    retry "^0.12.0"
+    signal-exit "^3.0.2"
+
 proxy-addr@~2.0.7:
   version "2.0.7"
   resolved "https://registry.npmmirror.com/proxy-addr/-/proxy-addr-2.0.7.tgz#f19fe69ceab311eeb94b42e70e8c2070f9ba1025"
@@ -9944,6 +9981,11 @@ ret@~0.1.10:
   version "0.1.15"
   resolved "https://registry.npmmirror.com/ret/-/ret-0.1.15.tgz#b8a4825d5bdb1fc3f6f53c2bc33f81388681c7bc"
   integrity sha512-TTlYpa+OL+vMMNG24xSlQGEJ3B/RzEfUlLct7b5G/ytav+wPrplCpVMFuwzXbkecJrb6IYo1iFb0S9v37754mg==
+
+retry@^0.12.0:
+  version "0.12.0"
+  resolved "https://registry.npmmirror.com/retry/-/retry-0.12.0.tgz#1b42a6266a21f07421d1b0b54b7dc167b01c013b"
+  integrity sha512-9LkiTwjUh6rT555DtE9rTX+BKByPfrMzEAtnlEtdEwr3Nkffwiihqe2bWADg+OQRjt9gl6ICdmB/ZFDCGAtSow==
 
 reusify@^1.0.4:
   version "1.0.4"
@@ -10463,6 +10505,11 @@ solhint@^3.3.6:
     semver "^6.3.0"
   optionalDependencies:
     prettier "^1.14.3"
+
+solidity-ast@^0.4.15:
+  version "0.4.40"
+  resolved "https://registry.npmmirror.com/solidity-ast/-/solidity-ast-0.4.40.tgz#182709271b4e55efb34e2da934dfaa96ee0cf40b"
+  integrity sha512-M8uLBT2jgFB7B0iVAC5a2l71J8vim7aEm03AZkaHbDqyrl1pE+i5PriMEw6WlwGfHp3/Ym7cn9BqvVLQgRk+Yw==
 
 solidity-comments-extractor@^0.0.7:
   version "0.0.7"
@@ -11317,7 +11364,7 @@ underscore@^1.8.3:
   resolved "https://registry.npmmirror.com/underscore/-/underscore-1.13.6.tgz#04786a1f589dc6c09f761fc5f45b89e935136441"
   integrity sha512-+A5Sja4HP1M08MaXya7p5LvjuM7K6q/2EaC0+iovj/wOcMsTzMvDFbasi/oSapiwOlt252IqsKqPjCl7huKS0A==
 
-undici@^5.4.0:
+undici@^5.14.0, undici@^5.4.0:
   version "5.14.0"
   resolved "https://registry.npmmirror.com/undici/-/undici-5.14.0.tgz#1169d0cdee06a4ffdd30810f6228d57998884d00"
   integrity sha512-yJlHYw6yXPPsuOH0x2Ib1Km61vu4hLiRRQoafs+WUgX1vO64vgnxiCEN9dpIrhZyHFsai3F0AEj4P9zy19enEQ==
