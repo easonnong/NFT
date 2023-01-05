@@ -21,6 +21,7 @@ const { developmentChains } = require("../../helper-hardhat-config")
       describe("listItem", function () {
         it("exclusively items that haven't been listed", async () => {
           let { potatoz } = await loadFixture(deployContractLockFixture)
+          console.log("Potatoz deployed to:", potatoz.address)
         })
       })
     })
