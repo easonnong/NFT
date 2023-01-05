@@ -22,7 +22,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
   console.log("Potatoz deployed to:", potatoz.address)
   console.log("Potatoz name:", await potatoz.name())
-  console.log("Potatoz version:", await potatoz._exists(1))
 
   const PotatozV2 = await ethers.getContractFactory("PotatozV2")
   const potatozV2 = await upgrades.upgradeProxy(potatoz, PotatozV2)
@@ -31,7 +30,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   console.log("PotatozV2 deployed to:", potatozV2.address)
   console.log("PotatozV2 name:", await potatozV2.name())
   console.log("PotatozV2 version:", await potatozV2.version())
-  console.log("PotatozV2 version:", await potatozV2._exists(1))
 
   const PotatozV3 = await ethers.getContractFactory("PotatozV3")
   const potatozV3 = await upgrades.upgradeProxy(potatoz, PotatozV3)

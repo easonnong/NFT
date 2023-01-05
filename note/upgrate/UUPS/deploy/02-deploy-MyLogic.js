@@ -11,17 +11,18 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
   const arguments = []
 
-  const MyLogic = await ethers.getContractFactory("MyLogic")
-  const myLogic = await upgrades.deployProxy(MyLogic, { kind: "uups" })
-  await myLogic.deployed()
+  const MyLogicV1 = await ethers.getContractFactory("MyLogicV1")
+  const myLogicV1 = await upgrades.deployProxy(MyLogicV1, { kind: "uups" })
+  await myLogicV1.deployed()
+  console.log("MyLogicV1 deployed to:", myLogicV1.address)
+  await myLogicV1.SetLogic("aa", 1)
+  console.log("GetLogic:", (await myLogicV1.GetLogic("aa")).toString())
 
-  console.log("MyLogic deployed to:", myLogic.address)
-  console.log("MyLogic name:", await myLogic.name())
-  console.log("MyLogic version:", await myLogic._exists(1))
-
+  /*
   const MyLogicV2 = await ethers.getContractFactory("MyLogicV2")
   const myLogicV2 = await upgrades.upgradeProxy(myLogic, MyLogicV2)
   await myLogicV2.deployed()
+  */
 
   /*
   const MyLogicV3 = await ethers.getContractFactory("MyLogicV3")
@@ -35,7 +36,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   // Verify the deployment
   if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
     log("Verifying...")
-    await verify(myLogic.address, arguments)
+    await verify(myLogicV1.address, arguments)
   }
 }
 
