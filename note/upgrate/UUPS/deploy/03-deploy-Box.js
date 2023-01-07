@@ -11,32 +11,31 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
   const arguments = []
 
+  /*
   const BoxV1 = await ethers.getContractFactory("BoxV1")
   const boxV1 = await upgrades.deployProxy(BoxV1, [3], { initializer: "initialize" })
   await boxV1.deployed()
   console.log("BoxV1 deployed to:", boxV1.address)
-  console.log("BoxV1 val:", boxV1.val())
-
-  /*
-  const MyLogicV2 = await ethers.getContractFactory("MyLogicV2")
-  const myLogicV2 = await upgrades.upgradeProxy(myLogic, MyLogicV2)
-  await myLogicV2.deployed()
+  console.log("BoxV1 val:", (await boxV1.val()).toString())
+  await boxV1.inc()
+  await boxV1.inc()
+  console.log("BoxV1 val after inc:", (await boxV1.val()).toString())
   */
 
-  /*
-  const MyLogicV3 = await ethers.getContractFactory("MyLogicV3")
-  const myLogicV3 = await upgrades.upgradeProxy(myLogic, MyLogicV3)
-  await myLogicV3.deployed()
+  const BoxV2 = await ethers.getContractFactory("BoxV2")
+  const boxV2 = await upgrades.upgradeProxy("0xad95143dA689E38F857ea75c70de87bf0383Ba8d", BoxV2)
+  await boxV2.deployed()
+  console.log("BoxV2 deployed to:", boxV2.address)
+  console.log("BoxV2 val:", (await boxV2.val()).toString())
+  await boxV2.inc()
+  await boxV2.inc()
+  console.log("BoxV2 val after inc:", (await boxV2.val()).toString())
 
-  console.log("MyLogicV3 deployed to:", myLogicV3.address)
-  console.log("MyLogicV3 name:", await myLogicV3.name())
-  console.log("MyLogicV3 version:", await myLogicV3.version())
-*/
   // Verify the deployment
   if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
     log("Verifying...")
-    await verify(boxV1.address, arguments)
+    await verify(boxV2.address, arguments)
   }
 }
 
-module.exports.tags = ["all", "myLogic"]
+module.exports.tags = ["all", "box"]
