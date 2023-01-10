@@ -1,0 +1,9 @@
+@openzeppelin/=node_modules/@openzeppelin/
+closedsea/=node_modules/closedsea/
+ds-test/=lib/forge-std/lib/ds-test/src/
+erc721a-upgradeable/=lib/closedsea/lib/erc721a-upgradeable/contracts/
+erc721a/=node_modules/erc721a/
+forge-std/=lib/forge-std/src/
+openzeppelin-contracts-upgradeable/=lib/closedsea/lib/openzeppelin-contracts-upgradeable/contracts/
+openzeppelin-contracts/=lib/closedsea/lib/openzeppelin-contracts/contracts/
+operator-filter-registry/=lib/closedsea/lib/operator-filter-registry/src/
