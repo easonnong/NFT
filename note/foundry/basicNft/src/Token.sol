@@ -31,6 +31,20 @@ contract Token is Ownable, OperatorFilterer, ERC2981, ERC721A {
     //                     OPERATOR FILTERING
     // =============================================================
 
+    function setApprovalForAll(
+        address operator,
+        bool approved
+    ) public override(ERC721A) onlyAllowedOperatorApproval(operator) {
+        super.setApprovalForAll(operator, approved);
+    }
+
+    function approve(
+        address operator,
+        uint256 tokenId
+    ) public payable override(ERC721A) onlyAllowedOperatorApproval(operator) {
+        super.approve(operator, tokenId);
+    }
+
     // =============================================================
     //                           ERC165
     // =============================================================
