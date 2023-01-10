@@ -28,8 +28,13 @@ contract Token is Ownable, OperatorFilterer, ERC2981, ERC721A {
     }
 
     // =============================================================
+    //                     OPERATOR FILTERING
+    // =============================================================
+
+    // =============================================================
     //                           ERC165
     // =============================================================
+
     function supportsInterface(
         bytes4 interfaceId
     ) public view override(ERC721A, ERC2981) returns (bool) {
@@ -41,6 +46,7 @@ contract Token is Ownable, OperatorFilterer, ERC2981, ERC721A {
     // =============================================================
     //                           ERC2981
     // =============================================================
+
     function setDefaultRoyalty(
         address receiver,
         uint96 feeNumerator
@@ -51,6 +57,7 @@ contract Token is Ownable, OperatorFilterer, ERC2981, ERC721A {
     // =============================================================
     //                           METADATA
     // =============================================================
+
     function setBaseURI(string calldata baseURI) external onlyOwner {
         _baseTokenURI = baseURI;
     }
