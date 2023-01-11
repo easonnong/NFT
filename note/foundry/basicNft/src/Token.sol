@@ -6,6 +6,8 @@ import {OperatorFilterer} from "closedsea/src/OperatorFilterer.sol";
 import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
 import {ERC721A} from "erc721a/contracts/ERC721A.sol";
 
+error MaxSupplyReached();
+
 contract Token is Ownable, OperatorFilterer, ERC2981, ERC721A {
     enum SaleStates {
         CLOSED,
@@ -25,6 +27,34 @@ contract Token is Ownable, OperatorFilterer, ERC2981, ERC721A {
         _registerForOperatorFiltering();
         // Set initial 5% royalty
         // _setDefaultRoyalty(royaltyReceiver, 500);
+    }
+
+    // =============================================================
+    //                    OWNER ONLY FUNCTIONS
+    // =============================================================
+
+    function ownerMint(address to, uint256 quantity) external onlyOwner {
+        if (_totalMinted() + quantity > MAX_SUPPLY) {
+            revert MaxSupplyReached();
+        }
+        _mint(to, quantity);
+    }
+
+    function setSaleState(uint256 newSaleState) external onlyOwner {
+        saleState = SaleState(newSaleState);
+    }
+
+    function setAllowlist(address[] calldata addresses) external onlyOwner {
+        for (uint256 i; i < addresses.length; ) {
+            _setAux(addresses[i], i);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    function isOnAllowlist(address user) external view returns (bool) {
+        return _getAux(user) > 0;
     }
 
     // =============================================================
