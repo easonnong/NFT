@@ -21,7 +21,7 @@ contract Token is Ownable, OperatorFilterer, ERC2981, ERC721A {
     uint256 public constant MAX_SUPPLY = 100;
     uint256 public constant MAX_PER_MINT = 3;
 
-    SaleStates public SaleState;
+    SaleStates public saleState;
     address public royaltyReceiver;
     bool public operatorFilteringEnabled = true;
     string public _baseTokenURI = "";
@@ -37,11 +37,11 @@ contract Token is Ownable, OperatorFilterer, ERC2981, ERC721A {
     // =============================================================
 
     function allowlistMint() external {
-        if (saleState != saleState.ALLOWLIST) revert InvalidSaleState();
+        if (saleState != SaleStates.ALLOWLIST) revert InvalidSaleState();
 
         uint64 numAllowlists = _getAux(msg.sender);
         if (numAllowlists == 0) revert NotOnAllowlist();
-        if (_totalMinted + 1 > MAX_SUPPLY) {
+        if (_totalMinted() + 1 > MAX_SUPPLY) {
             revert MaxSupplyReached();
         }
 
@@ -50,7 +50,7 @@ contract Token is Ownable, OperatorFilterer, ERC2981, ERC721A {
     }
 
     function publicMint(uint256 qty) external {
-        if (saleState != SaleState.PUBLIC) revert InvalidSaleState();
+        if (saleState != SaleStates.PUBLIC) revert InvalidSaleState();
         if (qty > MAX_PER_MINT) revert InvalidQuantity();
         if (_totalMinted() + qty > MAX_SUPPLY) {
             revert MaxSupplyReached();
@@ -70,7 +70,7 @@ contract Token is Ownable, OperatorFilterer, ERC2981, ERC721A {
     }
 
     function setSaleState(uint256 newSaleState) external onlyOwner {
-        saleState = SaleState(newSaleState);
+        saleState = SaleStates(newSaleState);
     }
 
     function setAllowlist(address[] calldata addresses) external onlyOwner {
