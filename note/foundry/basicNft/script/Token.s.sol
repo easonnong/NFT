@@ -11,7 +11,7 @@ import "erc721a/contracts/interfaces/IERC721A.sol";
 contract TokenScript is Script {
     function setUp() public {}
 
-    function getSelector() public {
+    function getSelector() public view {
         bytes4 _IERC165InterfaceId = type(IERC165).interfaceId;
         console.log("_IERC165InterfaceId:");
         console.logBytes4(_IERC165InterfaceId);
