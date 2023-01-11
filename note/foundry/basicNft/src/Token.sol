@@ -45,6 +45,39 @@ contract Token is Ownable, OperatorFilterer, ERC2981, ERC721A {
         super.approve(operator, tokenId);
     }
 
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public payable override(ERC721A) onlyAllowedOperator(from) {
+        super.transferFrom(from, to, tokenId);
+    }
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public payable override(ERC721A) onlyAllowedOperator(from) {
+        super.safeTransferFrom(from, to, tokenId);
+    }
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory data
+    ) public payable override(ERC721A) onlyAllowedOperator(from) {
+        super.safeTransferFrom(from, to, tokenId, data);
+    }
+
+    function setOperatorFilteringEnabled(bool value) public onlyOwner {
+        operatorFilteringEnabled = value;
+    }
+
+    function _operatorFilteringEnabled() internal view override returns (bool) {
+        return operatorFilteringEnabled;
+    }
+
     // =============================================================
     //                           ERC165
     // =============================================================
