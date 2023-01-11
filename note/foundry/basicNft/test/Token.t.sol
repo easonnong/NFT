@@ -90,7 +90,10 @@ contract TokenTest is Test {
         }
     }
 
-    function testSupportsInterface() public view {}
+    function testSupportsInterface() public view {
+        assert(token.supportsInterface(0x01ffc9a7)); // IERC165
+        assert(token.supportsInterface(0xc21b8f28)); // IERC721
+    }
 
     function testTokenURI() public {
         token.ownerMint(user1, 1);

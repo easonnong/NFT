@@ -24,9 +24,6 @@ contract TokenScript is Script {
         bytes4 _IERC721MetadataInterfaceId = type(IERC721Metadata).interfaceId;
         console.log("IERC721MetadataInterfaceId:");
         console.logBytes4(_IERC721MetadataInterfaceId);
-        bytes4 _IERC721aInterfaceId = type(IERC721A).interfaceId;
-        console.log("IERC721aInterfaceId:");
-        console.logBytes4(_IERC721aInterfaceId);
     }
 
     function run() public {
