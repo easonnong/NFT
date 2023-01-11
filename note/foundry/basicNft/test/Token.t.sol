@@ -92,7 +92,9 @@ contract TokenTest is Test {
 
     function testSupportsInterface() public view {
         assert(token.supportsInterface(0x01ffc9a7)); // IERC165
-        assert(token.supportsInterface(0xc21b8f28)); // IERC721
+        assert(token.supportsInterface(0x2a55205a)); // IERC2981
+        assert(token.supportsInterface(0x80ac58cd)); // IERC721
+        assert(token.supportsInterface(0x5b5e139f)); // IERC721Metadata
     }
 
     function testTokenURI() public {
