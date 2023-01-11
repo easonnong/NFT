@@ -6,7 +6,10 @@ import {OperatorFilterer} from "closedsea/src/OperatorFilterer.sol";
 import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
 import {ERC721A} from "erc721a/contracts/ERC721A.sol";
 
+error InvalidSaleState();
+error NotOnAllowlist();
 error MaxSupplyReached();
+error InvalidQuantity();
 
 contract Token is Ownable, OperatorFilterer, ERC2981, ERC721A {
     enum SaleStates {
@@ -30,6 +33,32 @@ contract Token is Ownable, OperatorFilterer, ERC2981, ERC721A {
     }
 
     // =============================================================
+    //                       MINT FUNCTIONS
+    // =============================================================
+
+    function allowlistMint() external {
+        if (saleState != saleState.ALLOWLIST) revert InvalidSaleState();
+
+        uint64 numAllowlists = _getAux(msg.sender);
+        if (numAllowlists == 0) revert NotOnAllowlist();
+        if (_totalMinted + 1 > MAX_SUPPLY) {
+            revert MaxSupplyReached();
+        }
+
+        _setAux(msg.sender, numAllowlists - 1);
+        _mint(msg.sender, 1);
+    }
+
+    function publicMint(uint256 qty) external {
+        if (saleState != SaleState.PUBLIC) revert InvalidSaleState();
+        if (qty > MAX_PER_MINT) revert InvalidQuantity();
+        if (_totalMinted() + qty > MAX_SUPPLY) {
+            revert MaxSupplyReached();
+        }
+        _mint(msg.sender, qty);
+    }
+
+    // =============================================================
     //                    OWNER ONLY FUNCTIONS
     // =============================================================
 
@@ -46,7 +75,7 @@ contract Token is Ownable, OperatorFilterer, ERC2981, ERC721A {
 
     function setAllowlist(address[] calldata addresses) external onlyOwner {
         for (uint256 i; i < addresses.length; ) {
-            _setAux(addresses[i], i);
+            _setAux(addresses[i], 1);
             unchecked {
                 ++i;
             }
