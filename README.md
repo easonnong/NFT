@@ -8,7 +8,7 @@ Featuring flash loans, price oracles, governance, NFTs, lending pools, smart con
 
 | Level                                   |
 | --------------------------------------- |
-| [1. Unstoppable](test/unstoppable)      |
+| [1. Unstoppable](test/unstoppable)✅    |
 | [2. Naive receiver](test/naivereceiver) |
 | [3. Truster](test/truster)              |
 | [4. Side Entrance](test/side-entrance)  |
