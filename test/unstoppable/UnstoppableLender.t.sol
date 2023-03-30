@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.10;
 
-import "../../unstoppable/UnstoppableLender.sol";
-import "../../unstoppable/ReceiverUnstoppable.sol";
+import "../../src/unstoppable/UnstoppableLender.sol";
+import "../../src/unstoppable/ReceiverUnstoppable.sol";
 
-import "../../DamnValuableToken.sol";
+import "../../src/DamnValuableToken.sol";
 
 import {Utilities} from "../utils/Utilities.sol";
 import {BaseTest} from "../BaseTest.sol";
 import {stdError} from "forge-std/Test.sol";
 
 contract UnstoppableLenderTest is BaseTest {
-
     uint TOKENS_IN_POOL = 1000000 ether;
     uint INITIAL_ATTACKER_TOKEN_BALANCE = 100 ether;
 
@@ -55,7 +54,6 @@ contract UnstoppableLenderTest is BaseTest {
         vm.stopPrank();
     }
 
-    
     function test_Exploit() public {
         runTest();
     }

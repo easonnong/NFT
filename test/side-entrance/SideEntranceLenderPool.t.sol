@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 import {Utilities} from "../utils/Utilities.sol";
 import {BaseTest} from "../BaseTest.sol";
 
-import "../../side-entrance/SideEntranceLenderPool.sol";
+import "../../src/side-entrance/SideEntranceLenderPool.sol";
 
 import "openzeppelin-contracts/utils/Address.sol";
 
@@ -37,11 +37,10 @@ contract Executor is IFlashLoanEtherReceiver {
         payable(owner).sendValue(address(this).balance);
     }
 
-    receive () external payable {}
+    receive() external payable {}
 }
 
 contract SideEntranceLenderPoolTest is BaseTest {
-
     // Pool has 1000000 ETH in balance
     uint ETHER_IN_POOL = 1000 ether;
 
@@ -73,7 +72,6 @@ contract SideEntranceLenderPoolTest is BaseTest {
         assertEq(address(pool).balance, ETHER_IN_POOL);
     }
 
-    
     function test_Exploit() public {
         runTest();
     }

