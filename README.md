@@ -12,7 +12,7 @@ Featuring flash loans, price oracles, governance, NFTs, lending pools, smart con
 | [2. Naive receiver](test/naivereceiver) ✅ |
 | [3. Truster](test/truster) ✅                |
 | [4. Side Entrance](test/side-entrance) ✅    |
-| [5. The Rewarder](test/the-rewarder)       |
+| [5. The Rewarder](test/the-rewarder) ✅      |
 | [6. Selfie](test/selfie)                   |
 | [7. Compromised](test/)                    |
 | [8. Puppet](test/puppet)                   |
